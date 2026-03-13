@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <link rel="icon" type="image/x-icon" href="/assets/favicon-16x16.png/">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Movie Catalogue</title>
+    <link rel="stylesheet" href="catalogue.css">
+</head>
+<body>
+
+<header>
+    <h1>Movie Catalogue</h1>
+    <button id="home-button" onclick="goHome()">Home</button>
+</header>
+
+<!-- Genre Container -->
+<div id="genre-container">
+    <!-- Dynamically generated content for genres -->
+</div>
+
+<!-- Overlay for Movie Details -->
+<div id="overlay">
+    <div class="movie-details">
+        <img id="movie-img" src="" alt="Movie Image">
+        <h2 id="movie-title">Movie Title</h2>
+        <p id="movie-description">Movie Description</p>
+        <button id="play-button" onclick="playMovie()">Play Movie</button>
+    </div>
+</div>
+
+<!-- Platform Container -->
+<div id="platform-container">
+    <h2>Available Platforms</h2>
+    <div class="platforms-grid">
+        <!-- Dynamically generated content for platforms -->
+    </div>
+</div>
+
+<script src="catalogue.js"></script>
+</body>
+</html>

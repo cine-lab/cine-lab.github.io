@@ -1,0 +1,181 @@
+/* General Reset */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body, html {
+    height: 100%;
+    font-family: 'Arial', sans-serif;
+}
+
+body {
+    background: linear-gradient(270deg, #7b2cbf, #b3cde0, #f7e4c6);
+    background-size: 400% 400%;
+    animation: gradient 8s ease infinite;
+    color: white;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+/* Gradient Animation */
+@keyframes gradient {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+}
+
+.container {
+    text-align: center;
+    width: 80%;
+    max-width: 600px;
+}
+
+header h1 {
+    font-size: 3rem;
+    margin-bottom: 2rem; /* Space below the title */
+    color: #fdfdff;
+    text-align: center; /* Center-align the title */
+}
+
+header .copyright {
+    font-size: 0.9rem;
+    opacity: 0.8;
+}
+
+.greeter {
+    font-size: 1.5rem;
+    margin-bottom: 1rem;
+    text-align: center;
+}
+
+.search-section {
+    position: relative;
+    margin-top: 1rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    max-width: 600px;
+    gap: 1rem;
+}
+
+#greeter {
+    font-size: 1.5rem;
+    margin-bottom: 1rem;
+    text-align: center;
+    color: white;
+}
+
+#search-bar {
+    width: 100%;
+    max-width: 600px;
+    padding: 0.8rem 1rem;
+    border: none;
+    border-radius: 25px;
+    font-size: 1rem;
+    outline: none;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+}
+
+#catalogue-button {
+    align-self: center; /* Ensures button stays centered */
+    margin-top: 1rem;  /* Space above the button for clarity */
+    padding: 0.8rem 1.5rem;
+    border: none;
+    border-radius: 25px;
+    background-color: #7b2cbf;
+    color: white;
+    font-size: 1rem;
+    font-weight: bold;
+    text-transform: uppercase;
+    cursor: pointer;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+    transition: background-color 0.3s ease, transform 0.2s ease;
+}
+
+#catalogue-button:hover {
+    background-color: #4f2573;
+    transform: scale(1.05);
+}
+
+.results {
+    margin-top: 1rem;
+    text-align: left;
+}
+
+.results div {
+    padding: 0.5rem 1rem;
+    background-color: rgba(255, 255, 255, 0.1);
+    border-radius: 10px;
+    margin-bottom: 0.5rem;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.results div:hover {
+    background-color: rgba(255, 255, 255, 0.2);
+}
+
+#embed-container iframe {
+    background-color: rgba(0, 0, 0, 0.8);
+    width: 100%;
+    margin-top: 1rem; /* Add space above the iframe */
+}
+
+.genre-section {
+    margin-bottom: 2rem;
+}
+
+.genre-section h2 {
+    font-size: 1.5rem;
+    margin-bottom: 1rem;
+}
+
+.genre-items {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+    justify-content: center;
+}
+
+
+.search-section {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    max-width: 600px;
+    width: 100%;
+    gap: 1rem;
+    text-align: center;
+}
+
+#greeter {
+    font-size: 1.5rem;
+    margin-bottom: 1rem;
+    color: white;
+}
+
+#search-bar {
+    width: 100%;
+    max-width: 600px;
+    padding: 0.8rem 1rem;
+    border: none;
+    border-radius: 25px;
+    font-size: 1rem;
+    outline: none;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+}
+
+main {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1rem;
+}
+
+#download-button:hover {
+    background-color: #388e3c;
+    transform: scale(1.05);
+}

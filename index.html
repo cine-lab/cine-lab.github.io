@@ -1,0 +1,699 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CineLab</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        @keyframes gradient {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+        .animated-gradient {
+            background: linear-gradient(270deg, #7b2cbf, #b3cde0, #f7e4c6);
+            background-size: 400% 400%;
+            animation: gradient 8s ease infinite;
+        }
+    
+        body::-webkit-scrollbar,
+        .movie-grid-container::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+            background: none !important;
+        }
+    
+        body::-webkit-scrollbar-thumb,
+        .movie-grid-container::-webkit-scrollbar-thumb {
+            background: #9b59b6;
+            border-radius: 4px;
+        }
+    
+        body::-webkit-scrollbar-track,
+        body:hover::-webkit-scrollbar-track,
+        .movie-grid-container::-webkit-scrollbar-track,
+        .movie-grid-container:hover::-webkit-scrollbar-track,
+        .movie-grid-container::-webkit-scrollbar-track-piece {
+            background: transparent !important;
+        }
+    
+        body,
+        .movie-grid-container {
+            scrollbar-width: thin;
+            scrollbar-color: #9b59b6 transparent;
+        }
+    
+        .movie-card {
+            width: 200px; 
+            min-width: 200px;
+            flex-shrink: 0;
+            transition: transform 0.3s ease;
+        }
+        .movie-card img {
+            height: 300px; 
+            object-fit: cover;
+        }
+    
+        #overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 40;
+            background-color: rgba(0, 0, 0, 0.9);
+            transition: opacity 0.3s ease;
+        }
+        .movie-details {
+            max-height: 90vh; 
+            overflow-y: auto; 
+            max-width: 500px; 
+            width: 90%;
+            position: relative; 
+        }
+    </style>
+    
+    </style>    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'cinelab-purple': '#7b2cbf',
+                        'cinelab-light': '#b3cde0',
+                        'cinelab-accent': '#f7e4c6',
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    },
+                }
+            }
+        }
+    </script>
+</head>
+<body class="animated-gradient min-h-screen text-white font-sans flex justify-center p-4">
+
+    <div id="app-container" class="w-full max-w-6xl mx-auto backdrop-blur-sm bg-gray-900/80 rounded-3xl shadow-2xl p-6 sm:p-10 transition-all duration-300">
+
+        <header class="text-center mb-8 flex justify-between items-center flex-wrap gap-4">
+            <h1 class="text-5xl font-extrabold text-cinelab-accent tracking-tighter">CineLab</h1>
+            <div class="flex items-center space-x-4">
+                <button id="nav-home" class="flex items-center px-4 py-2 bg-cinelab-purple hover:bg-cinelab-purple/80 text-white font-semibold rounded-full shadow-lg transition duration-200">
+                    <i data-lucide="home" class="w-5 h-5 mr-2"></i> Home
+                </button>
+                <button id="nav-catalogue" class="flex items-center px-4 py-2 bg-cinelab-purple hover:bg-cinelab-purple/80 text-white font-semibold rounded-full shadow-lg transition duration-200">
+                    <i data-lucide="layout-grid" class="w-5 h-5 mr-2"></i> Catalogue
+                </button>
+            </div>
+        </header>
+
+        <main class="w-full">
+            
+            <section id="home-view" class="space-y-6">
+                <div class="text-center">
+                    <p id="greeter" class="text-xl sm:text-2xl font-light mb-4 text-cinelab-light"></p>
+                    <div class="relative w-full max-w-xl mx-auto">
+                        <input type="text" id="search-bar" placeholder="Search for movies or TV shows..."
+                            class="w-full p-4 pl-12 bg-gray-800 border-2 border-cinelab-purple focus:border-cinelab-accent text-white rounded-full text-lg outline-none transition duration-300 shadow-xl">
+                        <i data-lucide="search" class="w-5 h-5 absolute left-4 top-1/2 transform -translate-y-1/2 text-cinelab-light"></i>
+                        
+                        <div id="results" class="absolute z-10 w-full mt-2 bg-gray-800 border border-gray-700 rounded-xl shadow-2xl overflow-hidden hidden max-h-80 overflow-y-auto">
+                        </div>
+                    </div>
+                </div>
+
+                <div id="embed-section" class="w-full mt-6 transition-all duration-300 hidden space-y-4">
+                    <div id="embed-container" class="w-full">
+                    </div>
+                    
+                    <div id="progress-controls" class="flex flex-col sm:flex-row justify-between items-center bg-gray-800/60 p-4 rounded-xl shadow-lg border border-gray-700 hidden">
+                        <div class="flex flex-col sm:flex-row items-center space-y-2 sm:space-y-0 sm:space-x-4">
+                            <button id="save-progress-btn" class="flex items-center px-4 py-2 bg-cinelab-purple hover:bg-cinelab-purple/80 text-white font-semibold rounded-full shadow-md transition duration-200 w-full sm:w-auto">
+                                <i data-lucide="bookmark" class="w-5 h-5 mr-2"></i> Manually Save Progress
+                            </button>
+                            <span id="current-progress-display" class="text-sm text-cinelab-light">No progress saved.</span>
+                        </div>
+                        <button id="clear-progress-btn" class="mt-3 sm:mt-0 text-red-400 hover:text-red-300 transition duration-200 text-sm hidden">
+                            Clear Progress
+                        </button>
+                    </div>
+                </div>
+                
+                <div id="message-box" class="fixed inset-0 bg-black/50 hidden z-50 items-center justify-center">
+                    <div class="bg-gray-800 p-6 rounded-xl shadow-2xl border-t-4 border-cinelab-purple text-center max-w-xs">
+                        <p id="message-text" class="text-lg mb-4"></p>
+                        <button onclick="document.getElementById('message-box').classList.add('hidden')"
+                            class="px-4 py-2 bg-cinelab-purple hover:bg-cinelab-purple/80 rounded-lg text-white font-semibold">
+                            OK
+                        </button>
+                    </div>
+                </div>
+
+            </section>
+
+            <section id="catalogue-view" class="space-y-10 hidden p-6 sm:p-10">
+                <div id="platform-container" class="bg-gray-800/60 p-6 rounded-2xl shadow-xl">
+                    <h2 class="text-3xl font-bold mb-4 text-cinelab-accent flex items-center">
+                        <i data-lucide="zap" class="w-6 h-6 mr-3"></i> Filter by Streaming Platform
+                    </h2>
+                    <div id="platforms-grid" class="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8 gap-4">
+                    </div>
+                    <button id="clear-platform-filter" class="mt-4 px-4 py-2 text-sm text-red-400 border border-red-400 rounded-full hover:bg-red-900/50 transition duration-200 hidden">
+                        Clear Filter
+                    </button>
+                </div>
+
+                <div id="genre-container">
+                    <div class="text-center p-8">
+                        <p id="catalogue-loading" class="text-xl text-cinelab-light">Loading catalogue...</p>
+                    </div>
+                </div>
+            </section>
+
+        </main>
+
+        <div id="overlay" class="fixed inset-0 bg-black/80 flex items-center justify-center z-40 transition-opacity duration-300 opacity-0 pointer-events-none">
+            <div class="movie-details bg-gray-800 p-6 rounded-2xl shadow-2xl border-t-4 border-cinelab-purple max-w-md w-11/12 relative">
+                <button id="close-overlay" class="absolute top-3 right-3 text-cinelab-light hover:text-white transition duration-200">
+                    <i data-lucide="x" class="w-6 h-6"></i>
+                </button>
+                <img id="movie-img" src="" alt="Movie Poster" class="w-full h-auto max-h-96 object-cover rounded-xl mb-4 shadow-lg border border-gray-700">
+                <h2 id="movie-title" class="text-3xl font-bold text-cinelab-accent mb-2"></h2>
+                <p id="movie-description" class="text-sm text-gray-300 mb-6 max-h-32 overflow-y-auto"></p>
+                <button id="play-button"
+                    class="w-full py-3 bg-green-600 hover:bg-green-700 text-white font-bold text-lg rounded-full shadow-lg transition duration-200 flex items-center justify-center space-x-2">
+                    <i data-lucide="play-circle" class="w-6 h-6"></i>
+                    <span>Start Watching</span>
+                </button>
+            </div>
+        </div>
+        
+        <div id="progress-modal" class="fixed inset-0 bg-black/80 flex items-center justify-center z-50 hidden">
+            <div class="bg-gray-900 p-8 rounded-xl shadow-2xl border-t-4 border-cinelab-accent w-11/12 max-w-md">
+                <h3 class="text-2xl font-bold mb-4 text-cinelab-accent">Save Your Progress</h3>
+                <p class="text-sm text-gray-400 mb-4">
+                    Due to security limitations, you must manually enter the time. Look at the player and enter the time you stopped (e.g., 45:30).
+                </p>
+                <div id="movie-title-progress" class="text-lg font-semibold mb-4 text-cinelab-light"></div>
+                
+                <label for="time-input" class="block mb-2 font-medium">Current Time (in minutes or MM:SS format):</label>
+                <input type="text" id="time-input" placeholder="e.g., 45:00 or 01:25:30"
+                    class="w-full p-3 bg-gray-800 border border-cinelab-purple rounded-lg text-white focus:outline-none focus:border-cinelab-accent mb-6">
+                
+                <div class="flex justify-end space-x-3">
+                    <button id="cancel-progress-btn" class="px-4 py-2 text-white bg-gray-700 rounded-lg hover:bg-gray-600">
+                        Cancel
+                    </button>
+                    <button id="submit-progress-btn" class="px-4 py-2 text-gray-900 font-bold bg-cinelab-accent rounded-lg hover:bg-cinelab-accent/80">
+                        Save Time
+                    </button>
+                </div>
+            </div>
+        </div>
+        <div id="leave-note-container"></div>
+
+        <footer class="text-center mt-10 pt-4 border-t border-gray-700 text-sm text-gray-400">
+            &copy; Myselionite | Powered by TMDb
+        </footer>
+
+    </div>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+            lucide.createIcons();
+
+            const API_KEY = "cea0d19ea30487a13953173dc3eb6c0c";
+            const BASE_URL = "https://api.themoviedb.org/3";
+            const EMBED_BASE_URL = "https://vidsrc.me/embed"; 
+            
+            const GENRES = {
+                Action: 28, Comedy: 35, Drama: 18, Horror: 27, Romance: 10749,
+                ScienceFiction: 878, Animation: 16, Thriller: 53, Crime: 80, 
+                Adventure: 12, Family: 10751, Fantasy: 14, Mystery: 966, 
+                Western: 37, War: 10752, Music: 10402, History: 36, Documentary: 99
+            };
+
+            const PLATFORMS = {
+                Netflix: { id: 8, color: '#E50914', icon: 'N', lucide: 'package' },
+                'Disney+': { id: 337, color: '#113ccf', icon: 'D+', lucide: 'star' },
+                Hulu: { id: 15, color: '#1CE783', icon: 'H', lucide: 'tv' },
+                'Amazon Prime Video': { id: 9, color: '#00A8E1', icon: 'P', lucide: 'gift' },
+                'HBO Max': { id: 384, color: '#8B00FF', icon: 'HBO', lucide: 'rabbit' },
+                Paramount: { id: 531, color: '#0064FF', icon: 'P+', lucide: 'mountain' },
+            };
+
+            let currentPage = "home";
+            let currentMovie = null;
+            let selectedPlatformId = null;
+
+            const appContainer = document.getElementById('app-container');
+            const homeView = document.getElementById("home-view");
+            const catalogueView = document.getElementById("catalogue-view");
+            const greeter = document.getElementById("greeter");
+            const searchBar = document.getElementById("search-bar");
+            const resultsDiv = document.getElementById("results");
+            const embedSection = document.getElementById("embed-section");
+            const embedContainer = document.getElementById("embed-container");
+            const progressControls = document.getElementById("progress-controls");
+            const currentProgressDisplay = document.getElementById("current-progress-display");
+            const platformGrid = document.getElementById("platforms-grid");
+            const catalogueContainer = document.getElementById("genre-container");
+            const loadingIndicator = document.getElementById("catalogue-loading");
+            const overlay = document.getElementById("overlay");
+            const movieImg = document.getElementById("movie-img");
+            const movieTitle = document.getElementById("movie-title");
+            const movieDescription = document.getElementById("movie-description");
+            const clearPlatformButton = document.getElementById("clear-platform-filter");
+            const progressModal = document.getElementById("progress-modal");
+            const timeInput = document.getElementById("time-input");
+            const movieTitleProgress = document.getElementById("movie-title-progress");
+            const body = document.body;
+
+            function showMessage(text) {
+                document.getElementById('message-text').textContent = text;
+                document.getElementById('message-box').classList.remove('hidden');
+                document.getElementById('message-box').classList.add('flex');
+            }
+            
+            function formatTime(seconds) {
+                if (typeof seconds !== 'number' || seconds < 0) return '00:00';
+                const totalSeconds = Math.floor(seconds);
+                const h = Math.floor(totalSeconds / 3600);
+                const m = Math.floor((totalSeconds % 3600) / 60);
+                const s = totalSeconds % 60;
+                
+                const parts = [];
+                if (h > 0) parts.push(String(h).padStart(2, '0'));
+                parts.push(String(m).padStart(2, '0'));
+                parts.push(String(s).padStart(2, '0'));
+                
+                return parts.join(':');
+            }
+            
+            function parseTimeToSeconds(timeString) {
+                const parts = timeString.split(':').map(p => parseInt(p, 10));
+                let seconds = 0;
+                
+                if (parts.some(p => isNaN(p) || p < 0)) return null;
+
+                if (parts.length === 3) {
+                    seconds = parts[0] * 3600 + parts[1] * 60 + parts[2];
+                } else if (parts.length === 2) { 
+                    seconds = parts[0] * 60 + parts[1];
+                } else if (parts.length === 1 && !isNaN(parts[0])) { 
+                    seconds = parts[0] * 60;
+                } else {
+                    return null;
+                }
+                return seconds;
+            }
+
+
+            function updateGreeter() {
+                const hours = new Date().getHours();
+                let timeMessage;
+                if (hours >= 6 && hours < 12) timeMessage = "morning";
+                else if (hours >= 12 && hours < 18) timeMessage = "afternoon";
+                else if (hours >= 18 && hours < 21) timeMessage = "evening";
+                else timeMessage = "tonight";
+                greeter.textContent = hours >= 21 || hours < 6
+                    ? `What would you like to watch ${timeMessage}?`
+                    : `What would you like to watch this ${timeMessage}?`;
+            }
+            updateGreeter();
+
+            const PROGRESS_KEY = 'cineLabProgress';
+
+            function getProgressData() {
+                try {
+                    return JSON.parse(localStorage.getItem(PROGRESS_KEY)) || {};
+                } catch {
+                    return {};
+                }
+            }
+
+            function saveProgress(id, timeInSeconds) {
+                const data = getProgressData();
+                data[id] = { time: timeInSeconds, timestamp: Date.now() };
+                localStorage.setItem(PROGRESS_KEY, JSON.stringify(data));
+                updateProgressDisplay(id, timeInSeconds);
+            }
+
+            function loadProgress(id) {
+                const data = getProgressData();
+                return data[id] ? data[id].time : 0;
+            }
+            
+            function clearProgress(id) {
+                const data = getProgressData();
+                delete data[id];
+                localStorage.setItem(PROGRESS_KEY, JSON.stringify(data));
+                updateProgressDisplay(id, 0);
+            }
+
+            function updateProgressDisplay(id, timeInSeconds) {
+                const time = timeInSeconds || loadProgress(id);
+                if (time > 0) {
+                    currentProgressDisplay.innerHTML = `Saved progress at: <span class="font-bold text-cinelab-accent">${formatTime(time)}</span>`;
+                    document.getElementById('clear-progress-btn').classList.remove('hidden');
+                } else {
+                    currentProgressDisplay.textContent = "No progress saved.";
+                    document.getElementById('clear-progress-btn').classList.add('hidden');
+                }
+            }
+
+            function showView(viewName) {
+                currentPage = viewName;
+                homeView.classList.add("hidden");
+                catalogueView.classList.add("hidden");
+                
+                const homeClasses = ['max-w-6xl', 'mx-auto', 'backdrop-blur-sm', 'bg-gray-900/80', 'rounded-3xl', 'shadow-2xl', 'p-6', 'sm:p-10'];
+                const fullScreenClasses = ['min-h-screen', 'bg-gray-900', 'p-0', 'rounded-none', 'shadow-none'];
+
+                if (viewName === "home") {
+                    homeView.classList.remove("hidden");
+                    appContainer.classList.add(...homeClasses);
+                    appContainer.classList.remove(...fullScreenClasses);
+                    body.classList.add('p-4');
+                } else if (viewName === "catalogue") {
+                    catalogueView.classList.remove("hidden");
+                    appContainer.classList.add(...fullScreenClasses);
+                    appContainer.classList.remove(...homeClasses);
+                    body.classList.remove('p-4', 'justify-center');
+                    
+                    displayPlatforms();
+                    displayGenres(selectedPlatformId);
+                }
+            }
+
+            async function searchMovies(query) {
+                if (!query.trim()) {
+                    resultsDiv.innerHTML = "";
+                    resultsDiv.classList.add("hidden");
+                    return;
+                }
+                try {
+                    const response = await fetch(
+                        `${BASE_URL}/search/multi?api_key=${API_KEY}&query=${encodeURIComponent(query)}&language=en-US`
+                    );
+                    const data = await response.json();
+                    displayResults(data.results);
+                } catch (error) {
+                    console.error("Error searching movies:", error);
+                    resultsDiv.innerHTML = `<div class="p-3 text-red-400">Error searching movies</div>`;
+                    resultsDiv.classList.remove("hidden");
+                }
+            }
+
+            function displayResults(items) {
+                const validItems = items.filter(item => item.media_type === 'movie' || item.media_type === 'tv');
+                if (validItems.length === 0) {
+                    resultsDiv.innerHTML = `<div class="p-3 text-gray-400">No results found.</div>`;
+                    resultsDiv.classList.remove("hidden");
+                    return;
+                }
+                
+                resultsDiv.innerHTML = validItems
+                    .slice(0, 8)
+                    .map(item => {
+                        const title = item.title || item.name || "Unknown Title";
+                        const releaseDate = item.release_date || item.first_air_date || "";
+                        const year = releaseDate ? ` (${new Date(releaseDate).getFullYear()})` : "";
+                        const mediaType = item.media_type;
+                        const tmdbId = item.id;
+                        return `
+                            <div class="p-3 hover:bg-cinelab-purple/30 cursor-pointer transition duration-150 border-b border-gray-700 last:border-b-0" 
+                                data-id="${tmdbId}" data-type="${mediaType}" data-title="${title}">
+                                ${title}${year} <span class="text-xs text-gray-400">(${mediaType.toUpperCase()})</span>
+                            </div>
+                        `;
+                    })
+                    .join("");
+                
+                resultsDiv.classList.remove("hidden");
+
+                document.querySelectorAll("#results > div").forEach(item => {
+                    item.addEventListener("click", () => {
+                        const tmdbId = item.getAttribute("data-id");
+                        const mediaType = item.getAttribute("data-type");
+                        const title = item.getAttribute("data-title");
+                        searchBar.value = title;
+                        resultsDiv.classList.add("hidden");
+                        currentMovie = { tmdbId, mediaType, title };
+                        embedVideo(tmdbId, mediaType);
+                    });
+                });
+            }
+
+            function embedVideo(tmdbId, mediaType) {
+                const typePath = mediaType === "movie" ? "movie" : "tv";
+                
+                const savedTime = loadProgress(tmdbId);
+                
+                let embedURL = `${EMBED_BASE_URL}/${typePath}/${tmdbId}`;
+                
+                if (savedTime > 0) {
+                    embedURL += `?t=${savedTime}`;
+                    showMessage(`Resuming playback! We found saved progress at: ${formatTime(savedTime)}. The player should automatically seek, but you may need to manually adjust.`);
+                }
+                
+                const iframe = document.createElement("iframe");
+                iframe.src = embedURL;
+                iframe.setAttribute("frameborder", "0");
+                iframe.setAttribute("allowfullscreen", "");
+                iframe.classList.add('w-full', 'aspect-video', 'rounded-xl', 'shadow-2xl', 'border-4', 'border-cinelab-purple', 'bg-black');
+                
+                embedContainer.innerHTML = "";
+                embedContainer.appendChild(iframe);
+                embedSection.classList.remove("hidden");
+                progressControls.classList.remove("hidden");
+                
+                updateProgressDisplay(tmdbId, savedTime);
+            }
+
+            function showProgressModal() {
+                if (!currentMovie) {
+                    showMessage("Error: Please select or search for a movie/show first.");
+                    return;
+                }
+                
+                movieTitleProgress.textContent = currentMovie.title;
+                timeInput.value = '';
+                progressModal.classList.remove('hidden');
+            }
+            
+            function hideProgressModal() {
+                progressModal.classList.add('hidden');
+            }
+
+            document.getElementById("save-progress-btn").addEventListener("click", showProgressModal);
+            document.getElementById("cancel-progress-btn").addEventListener("click", hideProgressModal);
+            document.getElementById("clear-progress-btn").addEventListener("click", () => {
+                if(currentMovie) {
+                    clearProgress(currentMovie.tmdbId);
+                    showMessage(`Progress for "${currentMovie.title}" has been cleared.`);
+                }
+            });
+
+            document.getElementById("submit-progress-btn").addEventListener("click", () => {
+                const timeString = timeInput.value.trim();
+                const totalSeconds = parseTimeToSeconds(timeString);
+
+                if (!currentMovie) {
+                    showMessage("Error: No movie/episode is currently loaded.");
+                    hideProgressModal();
+                    return;
+                }
+
+                if (totalSeconds === null || totalSeconds < 0 || isNaN(totalSeconds)) {
+                    showMessage("Please enter a valid time (e.g., 45:30 or 01:25:30).");
+                    return;
+                }
+
+                saveProgress(currentMovie.tmdbId, totalSeconds);
+                showMessage(`Progress for "${currentMovie.title}" saved at ${formatTime(totalSeconds)}.`);
+                hideProgressModal();
+            });
+
+            function selectPlatform(platformId) {
+                selectedPlatformId = platformId;
+                document.querySelectorAll('.platform-button').forEach(btn => {
+                    const isSelected = btn.dataset.id === String(platformId);
+                    btn.classList.toggle('bg-cinelab-purple', isSelected);
+                    btn.classList.toggle('bg-gray-700', !isSelected);
+                    btn.classList.toggle('border-cinelab-accent', isSelected);
+                    btn.classList.toggle('border-gray-600', !isSelected);
+                });
+                clearPlatformButton.classList.remove('hidden');
+                displayGenres(platformId);
+            }
+            
+            window.selectPlatform = selectPlatform;
+
+            function clearPlatformFilter() {
+                selectedPlatformId = null;
+                document.querySelectorAll('.platform-button').forEach(btn => {
+                    btn.classList.replace('bg-cinelab-purple', 'bg-gray-700');
+                    btn.classList.replace('border-cinelab-accent', 'border-gray-600');
+                });
+                clearPlatformButton.classList.add('hidden');
+                displayGenres(null);
+            }
+            
+            document.getElementById("clear-platform-filter").addEventListener("click", clearPlatformFilter);
+
+
+            function displayPlatforms() {
+                platformGrid.innerHTML = Object.entries(PLATFORMS).map(([name, platform]) => {
+                    const iconSvg = `<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-${platform.lucide}"><path d="M12 21c4.97 0 9-4.03 9-9s-4.03-9-9-9-9 4.03-9 9 4.03 9 9 9z" style="fill: ${platform.color}; stroke: none;"/><text x="12" y="15" text-anchor="middle" font-size="12px" fill="white" font-weight="bold">${platform.icon}</text></svg>`;
+
+                    return `
+                        <button class="platform-button bg-gray-700 hover:bg-gray-600 p-3 rounded-xl shadow-md transition duration-200 border border-gray-600 text-center flex flex-col items-center space-y-2 text-sm font-semibold"
+                            data-id="${platform.id}"
+                            onclick="selectPlatform(${platform.id})">
+                            ${iconSvg}
+                            <span>${name}</span>
+                        </button>
+                    `;
+                }).join('');
+
+                if (selectedPlatformId) {
+                    selectPlatform(selectedPlatformId);
+                }
+            }
+
+            async function fetchMoviesByGenre(genreId, providerId = null) {
+                let url = `${BASE_URL}/discover/movie?api_key=${API_KEY}&with_genres=${genreId}&sort_by=popularity.desc&language=en-US`;
+                
+                if (providerId) {
+                    url += `&watch_region=US&with_watch_providers=${providerId}`;
+                }
+                
+                try {
+                    const response = await fetch(url);
+                    if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+                    const data = await response.json();
+                    return data.results;
+                } catch (error) {
+                    console.error("Error fetching movies:", error);
+                    return [];
+                }
+            }
+
+            async function displayGenres(providerId = null) {
+                catalogueContainer.innerHTML = '';
+                loadingIndicator.classList.remove('hidden');
+
+                const genrePromises = Object.entries(GENRES).map(async ([genreName, genreId]) => {
+                    const movies = await fetchMoviesByGenre(genreId, providerId);
+                    return { genreName, movies };
+                });
+
+                const genreResults = await Promise.all(genrePromises);
+                loadingIndicator.classList.add('hidden');
+
+                let content = '';
+                
+                genreResults.forEach(({ genreName, movies }) => {
+                    const relevantMovies = movies.slice(0, 6); 
+                    if (relevantMovies.length === 0) return;
+
+                    const genreTitle = genreName.replace(/([A-Z])/g, " $1").trim();
+                    
+                    const movieCards = relevantMovies.map(movie => `
+                        <div class="movie-card bg-gray-800/80 rounded-xl overflow-hidden shadow-xl cursor-pointer hover:scale-[1.03] transition-transform duration-300 border border-gray-700" 
+                            data-id="${movie.id}" data-type="movie" data-title="${movie.title}" data-overview="${movie.overview || ''}" data-poster="${movie.poster_path}">
+                            <img src="${movie.poster_path ? 'https://image.tmdb.org/t/p/w300' + movie.poster_path : 'https://placehold.co/300x450/333333/ffffff?text=No+Poster'}" 
+                                alt="${movie.title}" class="w-full h-auto object-cover border-b-2 border-cinelab-purple">
+                            <h3 class="text-base font-semibold p-3 text-cinelab-light truncate">${movie.title}</h3>
+                        </div>
+                    `).join('');
+
+                    content += `
+                        <div class="genre-section mb-10">
+                            <h2 class="text-3xl font-bold mb-4 text-cinelab-accent tracking-wide">${genreTitle}</h2>
+                            <div class="movie-grid-container flex overflow-x-auto snap-x snap-mandatory space-x-4 pb-4">
+                                ${movieCards}
+                            </div>
+                        </div>
+                    `;
+                });
+
+                catalogueContainer.innerHTML = content || `<div class="p-10 text-center text-xl text-cinelab-light">No movies found for this filter. Try clearing the platform filter.</div>`;
+                
+                document.querySelectorAll(".movie-card").forEach(card => {
+                    card.addEventListener("click", () => showOverlay(card));
+                });
+            }
+            
+            function showOverlay(cardElement) {
+                const tmdbId = cardElement.getAttribute("data-id");
+                const mediaType = cardElement.getAttribute("data-type");
+                const title = cardElement.getAttribute("data-title");
+                const overview = cardElement.getAttribute("data-overview");
+                const posterPath = cardElement.getAttribute("data-poster");
+                
+                movieImg.src = posterPath ? `https://image.tmdb.org/t/p/w500${posterPath}` : 'https://placehold.co/500x750/333333/ffffff?text=No+Poster';
+                movieTitle.textContent = title;
+                movieDescription.textContent = overview || "No description available.";
+                
+                currentMovie = { tmdbId, mediaType, title };
+
+                overlay.classList.remove("opacity-0", "pointer-events-none");
+                overlay.classList.add("opacity-100");
+                
+                appContainer.scrollTo({ top: 0, behavior: 'smooth' });
+            }
+
+            function hideOverlay() {
+                overlay.classList.remove("opacity-100");
+
+                setTimeout(() => {
+                    overlay.classList.add("opacity-0", "pointer-events-none");
+                }, 300);
+            }
+
+            function playMovie() {
+                if (!currentMovie) return;
+                
+                embedVideo(currentMovie.tmdbId, currentMovie.mediaType);
+                searchBar.value = currentMovie.title;
+                hideOverlay();
+                showView('home');
+                
+                document.getElementById('embed-section').scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }
+
+            document.getElementById("nav-home").addEventListener("click", () => showView("home"));
+            document.getElementById("nav-catalogue").addEventListener("click", () => showView("catalogue"));
+
+            searchBar.addEventListener("input", () => searchMovies(searchBar.value));
+            
+            searchBar.addEventListener("blur", () => {
+                setTimeout(() => {
+                    if (!resultsDiv.querySelector(":hover")) {
+                        resultsDiv.classList.add("hidden");
+                    }
+                }, 200);
+            });
+            
+            document.getElementById("close-overlay").addEventListener("click", hideOverlay);
+            overlay.addEventListener("click", (e) => {
+                if (e.target === overlay) {
+                    hideOverlay();
+                }
+            });
+
+            document.getElementById("play-button").addEventListener("click", playMovie);
+
+            showView('home');
+        });
+    </script>
+
+</body>
+</html>

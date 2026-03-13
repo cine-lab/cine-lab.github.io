@@ -1,0 +1,225 @@
+/* General Styles */
+body {
+    font-family: 'Arial', sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: #222;
+    color: #fff;
+    box-sizing: border-box;
+}
+
+/* Header Styles */
+header {
+    background-color: #111;
+    padding: 1rem 0;
+    text-align: center;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+}
+
+header h1 {
+    color: #ffcc70;
+    font-size: 2rem;
+    margin: 0;
+}
+
+/* Genre Container */
+#genre-container {
+    margin: 20px;
+}
+
+.genre-section {
+    margin-bottom: 40px;
+}
+
+.genre-section h2 {
+    font-size: 1.5rem;
+    color: #ffcc70;
+    text-transform: uppercase;
+    margin-bottom: 10px;
+}
+
+.movie-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 20px;
+}
+
+/* Movie Card */
+.movie-card {
+    background-color: #333;
+    border-radius: 10px;
+    overflow: hidden;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+    cursor: pointer;
+    transition: transform 0.3s ease;
+    text-align: center;
+}
+
+.movie-card:hover {
+    transform: scale(1.05);
+}
+
+.movie-card img {
+    width: 100%;
+    height: auto;
+    border-bottom: 2px solid #ffcc70;
+}
+
+.movie-card h3 {
+    font-size: 1.1rem;
+    color: #ffcc70;
+    padding: 10px;
+}
+
+/* Movie Details Overlay */
+#overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.8);
+    display: none;  /* Initially hidden */
+    z-index: 10;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;  /* Center content vertically and horizontally */
+}
+
+#overlay.active {
+    display: flex;  /* Show overlay when active */
+}
+
+/* Movie Details Card */
+.movie-details {
+    position: relative;
+    width: 40%;
+    max-width: 300px;
+    background-color: rgba(0, 0, 0, 0.9);
+    border-radius: 15px;
+    padding: 20px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.6);
+    text-align: center;
+    z-index: 9999;
+}
+
+.movie-details img {
+    max-width: 100%;
+    height: auto;
+    max-height: 300px;
+    object-fit: cover;
+    border-radius: 10px;
+    margin-bottom: 15px;
+}
+
+.movie-details h2 {
+    font-size: 1.5rem;
+    margin-bottom: 10px;
+    color: #ffcc70;
+}
+
+.movie-details p {
+    font-size: 1.1rem;
+    line-height: 1.6;
+    margin-bottom: 20px;
+    color: #fff;
+}
+
+/* Button Styles */
+#overlay .close-btn {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background-color: #ffcc70;
+    color: #6a0dad;
+    border: none;
+    padding: 10px;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+#overlay .close-btn:hover {
+    background-color: #ffd78a;
+}
+
+#play-button {
+    background-color: #9b59b6; /* Purple matching your site's gradient */
+    color: white;
+    border: none;
+    padding: 0.75rem 1.5rem;
+    border-radius: 50px; /* Fully rounded */
+    font-size: 1rem;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+}
+
+#play-button:hover {
+    background-color: #7b2cbf; /* Darker purple on hover */
+    transform: scale(1.05);
+}
+
+
+/* Search Bar */
+#search-bar {
+    width: 80%;
+    max-width: 400px;
+    padding: 10px;
+    font-size: 1rem;
+    background-color: #333;
+    color: #fff;
+    border: 1px solid #444;
+    border-radius: 5px;
+    margin: 10px auto;
+    display: block;
+}
+
+/* Platforms Grid */
+.platforms-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    gap: 10px;
+    margin-top: 20px;
+}
+
+.platform-card {
+    background-color: #333;
+    border-radius: 10px;
+    padding: 15px;
+    text-align: center;
+    color: #fff;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+    transition: transform 0.3s ease;
+}
+
+.platform-card img {
+    width: 80px;
+    height: 80px;
+    margin-bottom: 10px;
+}
+
+.platform-card:hover {
+    transform: scale(1.05);
+}
+
+/* Back Button */
+#home-button {
+    background-color: #ffcc70;
+    color: #6a0dad;
+    border: none;
+    padding: 10px 15px;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+    margin-top: 20px;
+    text-align: center;
+    display: block;
+    width: 150px;
+    margin: 20px auto;
+}
+
+#home-button:hover {
+    background-color: #ffd78a;
+}
